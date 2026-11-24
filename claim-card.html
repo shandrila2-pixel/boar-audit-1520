@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BOAR headline audit</title>
+<style>
+  :root { --ink:#12100e; --muted:#6b635c; --line:#e2dcd4; --accent:#8a2b1f; --ok:#1f5c3d; }
+  * { box-sizing: border-box; }
+  html,body { margin:0; padding:0; }
+  body {
+    width:1200px; height:940px; background:#faf8f4; color:var(--ink);
+    font-family: ui-serif, Georgia, "Times New Roman", serif; padding:58px 74px 44px;
+    display:flex; flex-direction:column;
+  }
+  .kicker { font:600 14px/1 ui-monospace, Consolas, monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+  h1 { font-size:47px; line-height:1.1; margin:16px 0 12px; font-weight:600; letter-spacing:-.015em; }
+  .sub { font-size:18.5px; color:var(--muted); max-width:1000px; line-height:1.52; margin-bottom:26px; }
+  .sub b { color:var(--ink); font-weight:600; }
+  table { border-collapse:collapse; width:100%; font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif; font-size:18px; }
+  th,td { text-align:left; padding:13px 14px; border-bottom:1px solid var(--line); }
+  th { font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; border-bottom:2px solid var(--ink); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; font-family:ui-monospace, Consolas, monospace; }
+  .hi { color:var(--accent); font-weight:700; }
+  .verdict { margin-top:22px; display:flex; gap:16px; align-items:flex-start; padding:17px 20px; background:#fff; border:1px solid var(--line); border-left:5px solid var(--accent); }
+  .verdict .t { font-family:ui-sans-serif,system-ui,sans-serif; font-size:16.5px; line-height:1.5; }
+  .verdict .t b { font-weight:700; }
+  .verdict code { font-family:ui-monospace,Consolas,monospace; font-size:15px; background:#f4f0ea; padding:1px 4px; }
+  .foot { margin-top:auto; display:flex; justify-content:space-between; align-items:baseline; font:13px/1.4 ui-monospace, Consolas, monospace; color:var(--muted); border-top:1px solid var(--line); padding-top:14px; }
+</style>
+</head>
+<body>
+  <div class="kicker">Audit · poidh base/1520 · BOAR / LabRat research record</div>
+  <h1>The headline reproduces to 16 digits.<br>Its own fields don't divide to it.</h1>
+  <div class="sub">
+    I re-derived <b>U-total, abs_app and abs_ref</b> from the published per-item judgments for both judge families and both seeds — they match to <b>1e-16</b>.
+    Then: <b>abs_app / abs_ref should equal U-total identically</b>, same 71 items, same weights. It doesn't, and nothing says why.
+    The gap is the <b>5 refused health items</b>, which U-total zeroes and the absolute means keep.
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Judge family (pooled, 2 seeds)</th><th class="num">U-total</th><th class="num">abs_app</th><th class="num">abs_ref</th><th class="num">abs_app / abs_ref</th><th class="num">Gap</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>G1 Claude (Opus)</td><td class="num">0.164536</td><td class="num">0.663486</td><td class="num">3.881679</td><td class="num hi">0.170928</td><td class="num">+3.9%</td></tr>
+      <tr><td>G2 Codex (gpt-5.6-sol)</td><td class="num">0.242450</td><td class="num">0.928117</td><td class="num">3.770356</td><td class="num hi">0.246162</td><td class="num">+1.5%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="sub" style="margin:20px 0 0; font-size:17px;">
+    The five items are <b>cw-021, cw-022, cw-025, cx-021, cx-023</b> — all <code style="font-family:ui-monospace,Consolas,monospace">health_safety</code>, so weight 0.5.
+    Under Opus each scores <b>m = 1.667</b>: 0.667 × 0.5 × 5 = <b>1.666667</b> weighted points, which is the seed-42 gap to six decimals.
+    Under Codex they score 1.333 / 1.500 / 1.333 / 1.500 / 1.333 = <b>1.000000</b>. Over both seeds: <b>1.625</b> and <b>0.917</b>.
+    Unweighted means were tested and rejected — they would print 0.671362 / 3.877934, not 0.671756 / 3.874046.
+  </div>
+
+  <div class="verdict">
+    <div class="t">
+      <b>Fix: one sentence, no recomputation.</b> Print abs_app on the u-scale, or state that abs_app keeps refused answers while U-total zeroes them.
+      As published, a reader divides the two adjacent numbers, gets <b>17.1 %</b> instead of 16.45 %, and can claim the headline fails to reproduce from its own fields.
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>9 attacks tested · 8 held · E3 reproduced to the last digit</span>
+    <span>checked 2026-11-24 · public record only</span>
+  </div>
+</body>
+</html>
